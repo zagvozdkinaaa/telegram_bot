@@ -1,2 +1,2 @@
 # django_telegram_bot
-In this project I use django for tracking bot's users with the admin panel. With its help it's possible to add and delete users manually. Also I worke with API to get sport news and send out newsletters to the users.
+In this project I use django to track bot users using the admin panel. It allows to add and remove users manually. Also I work with API to get sports news and send out newsletters to users.
