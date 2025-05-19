@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from telegram import Update
 from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes
-from user_data.models import UserData, News
+from user_data.models import UserData, News, SentNews
 import os
 import sys
 import django
@@ -25,13 +25,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Привет! Я бот спортивных новостей 🏀')
 
 async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        latest_news=News.objects.latest('published_at')
-        text=f'📰 {latest_news.title}\n\n{latest_news.content}'
-    except News.DoesNotExist:
-        text='Пока новостей нет.'
-        
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
+    user = update.effective_user
+
+    user_obj, _ = UserData.objects.get_or_create(
+        chat_id=user.id,
+        defaults={'username': user.username}
+    )
+
+    sent_news_ids = SentNews.objects.filter(user=user_obj).values_list('news_id', flat=True)
+    next_news = News.objects.exclude(id__in=sent_news_ids).order_by('published_at').first()
+
+    if next_news:
+        text = f'📰 {next_news.title}\n\n{next_news.content}'
+        await context.bot.send_message(chat_id=user.id, text=text)
+        SentNews.objects.create(user=user_obj, news=next_news)
+    else:
+        await context.bot.send_message(chat_id=user.id, text="У тебя пока нет новых новостей.")
 
 class Command(BaseCommand):
     help = 'Запуск Telegram-бота'

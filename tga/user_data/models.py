@@ -38,3 +38,11 @@ class News(models.Model):
 
     def __str__(self):
         return f'{self.title}, {self.published_at}'
+    
+class SentNews(models.Model):
+    user = models.ForeignKey(UserData, on_delete=models.CASCADE)
+    news = models.ForeignKey(News, on_delete=models.CASCADE)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'news')
