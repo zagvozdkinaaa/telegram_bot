@@ -1,0 +1,6 @@
+django
+aiogram
+python-dotenv
+requests
+beautifulsoup4
+psycopg2-binary
